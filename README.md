@@ -39,10 +39,17 @@ ai-memory-system/
 
 ## Setup
 
-1. Install `uv` ([docs](https://docs.astral.sh/uv/)).
-2. Create env and install deps:
+### Recommended (venv + pip)
+
+1. Create and activate virtual env:
    ```bash
-   uv sync --extra dev
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+2. Install build tools + project deps:
+   ```bash
+   pip install setuptools wheel
+   pip install --no-build-isolation -e ".[dev]"
    ```
 3. Configure env vars:
    ```bash
@@ -50,19 +57,26 @@ ai-memory-system/
    # then set OPENAI_API_KEY
    ```
 
+### Optional (uv)
+
+```bash
+uv sync --extra dev
+cp .env.example .env
+```
+
 ## Run
 
 - CLI chat:
   ```bash
-  uv run python scripts/chat_cli.py
+  python scripts/chat_cli.py
   ```
 - FastAPI:
   ```bash
-  uv run uvicorn api.app:app --reload
+  uvicorn api.app:app --reload
   ```
 - Tests:
   ```bash
-  uv run pytest
+  pytest -q
   ```
 
 ## Environment Variables
@@ -86,8 +100,13 @@ ai-memory-system/
 - Frontend is intentionally deferred for MVP quality on memory behavior.
 - Advanced features are phase-2 and should be implemented after core stability.
 
+## Troubleshooting
 
-source .venv/bin/activate
-pip install setuptools wheel
-pip install --no-build-isolation -e ".[dev]"
-cp .env.example .env
+- `ModuleNotFoundError: No module named 'config'` when launching CLI by absolute path:
+  - Fixed in current code. You can run either:
+    - `python scripts/chat_cli.py`
+    - `"/absolute/path/to/.venv/bin/python" "/absolute/path/to/scripts/chat_cli.py"`
+- `429 insufficient_quota` from OpenAI:
+  - Confirm key/project match the enrolled data-sharing project.
+  - Ensure billing balance/payment method is active.
+  - Chat model (`gpt-4.1-mini`) may be eligible for complimentary usage, but other calls (like embeddings) can still require paid quota.
